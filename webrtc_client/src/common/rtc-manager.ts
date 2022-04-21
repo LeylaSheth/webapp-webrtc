@@ -1,5 +1,5 @@
-import { streamManager } from './StreamManager';
-import { roomManager } from './RoomManager';
+import { streamManager } from './stream-manager';
+import { roomManager } from './room-manager';
 
 export class RTCManager {
   private connection: RTCPeerConnection

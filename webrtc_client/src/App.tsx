@@ -1,68 +1,84 @@
-import 'webrtc-adapter'
-import React, { ChangeEventHandler, useCallback, useEffect, useState } from 'react';
-import { LocalPreview } from './components/LocalPreview';
-import { roomManager, RoomState, RoomStateChangListener } from './common/RoomManager';
-import { RemoteVideo } from './components/RemoteVideo';
-import './App.scss'
-import { StreamChangeListener, streamManager } from './common/StreamManager';
+import "webrtc-adapter";
+import React, {
+  ChangeEventHandler,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
+import {
+  roomManager,
+  RoomState,
+  RoomStateChangListener,
+  StreamChangeListener,
+  streamManager,
+} from "./common";
+import { RemoteVideo, LocalPreview } from "./components";
+import "./App.scss";
 
 const App: React.FC = () => {
-
-  const [roomId, setRoomId] = useState(0)
-  const [localStreamReady, setLocalStreamReady] = useState(false)
-  const [roomState, setRoomState] = useState<RoomState>(RoomState.leave)
+  const [roomId, setRoomId] = useState(0);
+  const [localStreamReady, setLocalStreamReady] = useState(false);
+  const [roomState, setRoomState] = useState<RoomState>(RoomState.leave);
 
   const handleInput = useCallback<ChangeEventHandler<HTMLInputElement>>((e) => {
-    setRoomId(Number(e.target.value) || 0)
-  }, [])
+    setRoomId(Number(e.target.value) || 0);
+  }, []);
 
   const handleJoin = useCallback(() => {
-    roomManager.join(roomId)
-  }, [roomId])
+    roomManager.join(roomId);
+  }, [roomId]);
 
   const handleLeft = useCallback(() => {
-    roomManager.left()
-  }, [])
+    roomManager.left();
+  }, []);
 
   useEffect(() => {
     const handleLocalSteamReady: StreamChangeListener = (stream) => {
-      setLocalStreamReady(!!stream)
-    }
+      setLocalStreamReady(!!stream);
+    };
 
-    streamManager.addListener('localStreamChange', handleLocalSteamReady)
+    streamManager.addListener("localStreamChange", handleLocalSteamReady);
 
     return () => {
-      streamManager.removeListener('localStreamChange', handleLocalSteamReady)
-    }
-  }, [])
+      streamManager.removeListener("localStreamChange", handleLocalSteamReady);
+    };
+  }, []);
 
   useEffect(() => {
     const handleRoomStateChange: RoomStateChangListener = (state) => {
-      setRoomState(state)
-    }
+      setRoomState(state);
+    };
 
-    roomManager.addListener('roomStateChange', handleRoomStateChange)
+    roomManager.addListener("roomStateChange", handleRoomStateChange);
 
     return () => {
-      roomManager.removeListener('roomStateChange', handleRoomStateChange)
-    }
-  }, [])
+      roomManager.removeListener("roomStateChange", handleRoomStateChange);
+    };
+  }, []);
 
   return (
     <div className="App">
-      <div className={'video-container'}>
+      <div className={"video-container"}>
         <LocalPreview />
         <RemoteVideo />
       </div>
-      <div>请输入房间号：
-        <input value={roomId} onChange={handleInput}/>
+      <div>
+        请输入房间号：
+        <input value={roomId} onChange={handleInput} />
       </div>
       <div>
-        <button onClick={handleJoin} disabled={!localStreamReady || roomState !== RoomState.leave}>加入房间</button>
-        <button onClick={handleLeft} disabled={roomState === RoomState.leave}>离开房间</button>
+        <button
+          onClick={handleJoin}
+          disabled={!localStreamReady || roomState !== RoomState.leave}
+        >
+          加入房间
+        </button>
+        <button onClick={handleLeft} disabled={roomState === RoomState.leave}>
+          离开房间
+        </button>
       </div>
     </div>
   );
-}
+};
 
 export default App;

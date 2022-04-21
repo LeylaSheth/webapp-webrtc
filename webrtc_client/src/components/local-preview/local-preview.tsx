@@ -1,5 +1,5 @@
 import React, { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
-import { StreamChangeListener, streamManager } from '../../common/StreamManager';
+import { StreamChangeListener, streamManager } from '../../common/stream-manager';
 import styles from './index.module.scss'
 import classNames from 'classnames';
 
