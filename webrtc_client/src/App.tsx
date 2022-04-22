@@ -1,83 +1,41 @@
-import "webrtc-adapter";
-import React, {
-  ChangeEventHandler,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
-import {
-  roomManager,
-  RoomState,
-  RoomStateChangListener,
-  StreamChangeListener,
-  streamManager,
-} from "./common";
-import { RemoteVideo, LocalPreview } from "./components";
-import "./App.scss";
+import { FC, useMemo, useState } from "react";
+import { Producer } from "./pages";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { createTheme } from "@mui/material";
+import { ThemeProvider } from "@mui/system";
+import { ColorModeContext } from "./components";
 
-const App: React.FC = () => {
-  const [roomId, setRoomId] = useState(0);
-  const [localStreamReady, setLocalStreamReady] = useState(false);
-  const [roomState, setRoomState] = useState<RoomState>(RoomState.leave);
+const App: FC = () => {
+  const [mode, setMode] = useState<"light" | "dark">("dark");
+  const colorMode = useMemo(
+    () => ({
+      toggleColorMode: () => {
+        setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
+      },
+    }),
+    []
+  );
 
-  const handleInput = useCallback<ChangeEventHandler<HTMLInputElement>>((e) => {
-    setRoomId(Number(e.target.value) || 0);
-  }, []);
-
-  const handleJoin = useCallback(() => {
-    roomManager.join(roomId);
-  }, [roomId]);
-
-  const handleLeft = useCallback(() => {
-    roomManager.left();
-  }, []);
-
-  useEffect(() => {
-    const handleLocalSteamReady: StreamChangeListener = (stream) => {
-      setLocalStreamReady(!!stream);
-    };
-
-    streamManager.addListener("localStreamChange", handleLocalSteamReady);
-
-    return () => {
-      streamManager.removeListener("localStreamChange", handleLocalSteamReady);
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleRoomStateChange: RoomStateChangListener = (state) => {
-      setRoomState(state);
-    };
-
-    roomManager.addListener("roomStateChange", handleRoomStateChange);
-
-    return () => {
-      roomManager.removeListener("roomStateChange", handleRoomStateChange);
-    };
-  }, []);
+  const theme = useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode,
+        },
+      }),
+    [mode]
+  );
 
   return (
-    <div className="App">
-      <div className={"video-container"}>
-        <LocalPreview />
-        <RemoteVideo />
-      </div>
-      <div>
-        请输入房间号：
-        <input value={roomId} onChange={handleInput} />
-      </div>
-      <div>
-        <button
-          onClick={handleJoin}
-          disabled={!localStreamReady || roomState !== RoomState.leave}
-        >
-          加入房间
-        </button>
-        <button onClick={handleLeft} disabled={roomState === RoomState.leave}>
-          离开房间
-        </button>
-      </div>
-    </div>
+    <BrowserRouter>
+      <ColorModeContext.Provider value={colorMode}>
+        <ThemeProvider theme={theme}>
+          <Routes>
+            <Route path="/" element={<Producer />} />
+          </Routes>
+        </ThemeProvider>
+      </ColorModeContext.Provider>
+    </BrowserRouter>
   );
 };
 

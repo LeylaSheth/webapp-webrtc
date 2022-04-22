@@ -1,145 +1,150 @@
-import { io, Socket } from 'socket.io-client';
-import { RTCManager } from './RTCManager';
+import { io, Socket } from "socket.io-client";
+import { RTCManager } from "./rtc-manager";
 
 export enum RoomState {
-  leave = 'leave',
-  joined = 'joined',
-  joined_conn = 'joined_conn'
+  leave = "leave",
+  joined = "joined",
+  joined_conn = "joined_conn",
 }
 
-export type RoomStateChangListener = (state: RoomState) => void
+export type RoomStateChangListener = (state: RoomState) => void;
 
 export interface RoomEventMap {
-  roomStateChange: RoomStateChangListener
+  roomStateChange: RoomStateChangListener;
 }
 
 class RoomManager {
+  private roomId: number | undefined;
 
-  private roomId: number | undefined
+  private socket: Socket | undefined;
 
-  private socket: Socket | undefined
+  private roomState: RoomState = RoomState.leave;
 
-  private roomState: RoomState = RoomState.leave
+  private rtcManager: RTCManager | undefined;
 
-  private rtcManager: RTCManager | undefined
-
-  private roomStateChangeListeners: RoomStateChangListener[] = []
+  private roomStateChangeListeners: RoomStateChangListener[] = [];
 
   private setState(state: RoomState) {
-    this.roomState = state
-    this.roomStateChangeListeners.forEach(listener => listener(state))
+    this.roomState = state;
+    this.roomStateChangeListeners.forEach((listener) => listener(state));
   }
 
   private socketConnect() {
-    this.socketDisconnect()
-    if (process.env.NODE_ENV === 'development') {
-      this.socket = io('localhost:3001');
+    this.socketDisconnect();
+    if (process.env.NODE_ENV === "development") {
+      this.socket = io("localhost:3001");
     } else {
-      this.socket = io('socket.xulin.fun')
+      this.socket = io("socket.xulin.fun");
     }
 
-    this.socket.on('joined', (roomId, socketId, userCount) => {
-      console.log('receive joined message', roomId, socketId, userCount)
-      this.roomId = roomId
-      this.setState(RoomState.joined)
+    this.socket.on("joined", (roomId, socketId, userCount) => {
+      console.log("receive joined message", roomId, socketId, userCount);
+      this.roomId = roomId;
+      this.setState(RoomState.joined);
 
       if (userCount > 1) {
-        this.rtcManager = new RTCManager()
+        this.rtcManager = new RTCManager();
       }
-    })
+    });
 
-    this.socket.on('other_join', (roomId, socketId, userCount) => {
-      console.log('receive other_join message', roomId, socketId, userCount)
+    this.socket.on("other_join", (roomId, socketId, userCount) => {
+      console.log("receive other_join message", roomId, socketId, userCount);
 
       if (!this.rtcManager) {
-        this.rtcManager = new RTCManager()
+        this.rtcManager = new RTCManager();
       }
 
-      this.rtcManager.createOffer().then(offer => {
-        this.sendMessage(offer)
-      })
-    })
+      this.rtcManager.createOffer().then((offer) => {
+        this.sendMessage(offer);
+      });
+    });
 
-    this.socket.on('full', () => {
-      this.socketDisconnect()
-      this.rtcManager?.close()
-      this.rtcManager = undefined
-      alert('房间已满！')
-    })
+    this.socket.on("full", () => {
+      this.socketDisconnect();
+      this.rtcManager?.close();
+      this.rtcManager = undefined;
+      alert("房间已满！");
+    });
 
-    this.socket.on('left', () => {
-      this.setState(RoomState.leave)
-      this.socketDisconnect()
-    })
+    this.socket.on("left", () => {
+      this.setState(RoomState.leave);
+      this.socketDisconnect();
+    });
 
-    this.socket.on('bye', () => {
-      this.setState(RoomState.leave)
-      this.rtcManager?.close()
-      this.rtcManager = undefined
-    })
+    this.socket.on("bye", () => {
+      this.setState(RoomState.leave);
+      this.rtcManager?.close();
+      this.rtcManager = undefined;
+    });
 
-    this.socket.on('message', (roomId, data) => {
-      console.log('received message --->', data)
-      const type = data?.type
+    this.socket.on("message", (roomId, data) => {
+      console.log("received message --->", data);
+      const type = data?.type;
       switch (type) {
-        case 'offer':
-          this.rtcManager?.setRemoteOffer(data).then(answer => {
-            this.sendMessage(answer)
-          })
+        case "offer":
+          this.rtcManager?.setRemoteOffer(data).then((answer) => {
+            this.sendMessage(answer);
+          });
           break;
-        case 'answer':
-          this.rtcManager?.setRemoteAnswer(data)
+        case "answer":
+          this.rtcManager?.setRemoteAnswer(data);
           break;
-        case 'icecandidate':
+        case "icecandidate":
           if (data.candidate) {
-            this.rtcManager?.addCandidate(data.candidate)
+            this.rtcManager?.addCandidate(data.candidate);
           } else {
-            console.log('this is the end of candidate')
+            console.log("this is the end of candidate");
           }
-          break
+          break;
         default:
-          console.error('can not handle message', data)
+          console.error("can not handle message", data);
       }
-    })
+    });
   }
 
   sendMessage(data: any) {
-    console.log('sendMessage', this.roomId, data)
-    this.socket?.emit('message', this.roomId, data)
+    console.log("sendMessage", this.roomId, data);
+    this.socket?.emit("message", this.roomId, data);
   }
 
   private socketDisconnect() {
     if (this.socket) {
-      this.socket.disconnect()
-      this.socket = undefined
+      this.socket.disconnect();
+      this.socket = undefined;
     }
   }
 
   join(localRoomId: number) {
-    this.socketConnect()
-    this.socket?.emit('join', localRoomId)
+    this.socketConnect();
+    this.socket?.emit("join", localRoomId);
   }
 
   left() {
-    this.socket?.emit('leave', this.roomId)
-    this.rtcManager?.close()
-    this.rtcManager = undefined
+    this.socket?.emit("leave", this.roomId);
+    this.rtcManager?.close();
+    this.rtcManager = undefined;
   }
 
-  addListener<K extends keyof RoomEventMap>(type: K, listener: RoomEventMap[K]) {
-    if (type === 'roomStateChange') {
-      this.roomStateChangeListeners.push(listener)
+  addListener<K extends keyof RoomEventMap>(
+    type: K,
+    listener: RoomEventMap[K]
+  ) {
+    if (type === "roomStateChange") {
+      this.roomStateChangeListeners.push(listener);
     }
   }
 
-  removeListener<K extends keyof RoomEventMap>(type: K, listener: RoomEventMap[K]) {
-    if (type === 'roomStateChange') {
-      const targetIndex = this.roomStateChangeListeners.indexOf(listener)
+  removeListener<K extends keyof RoomEventMap>(
+    type: K,
+    listener: RoomEventMap[K]
+  ) {
+    if (type === "roomStateChange") {
+      const targetIndex = this.roomStateChangeListeners.indexOf(listener);
       if (targetIndex > -1) {
-        this.roomStateChangeListeners.splice(targetIndex, 1)
+        this.roomStateChangeListeners.splice(targetIndex, 1);
       }
     }
   }
 }
 
-export const roomManager = new RoomManager()
+export const roomManager = new RoomManager();
