@@ -17,6 +17,9 @@ export const RemoteVideo: React.FC<RemoteVideoProps> = ({ className }) => {
         videoRef.current.srcObject = stream;
         setLoading(false);
       }
+      if (!stream) {
+        setLoading(true);
+      }
     };
 
     streamManager.addListener("remoteStreamChange", handleStreamChange);

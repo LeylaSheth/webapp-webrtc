@@ -1,3 +1,4 @@
+import { Button, TextField } from "@mui/material";
 import { ChangeEventHandler, FC, useCallback, useState } from "react";
 import { roomManager } from "../../common";
 
@@ -25,17 +26,33 @@ export const RoomSetup: FC<RoomSetupProps> = ({
   }, []);
   return (
     <div className="room-setting">
+      <TextField
+        required
+        id="outlined-required"
+        label="RoomId"
+        value={roomId}
+        fullWidth
+        onChange={handleInput}
+        size="small"
+      />
+
       <div>
-        请输入房间号：
-        <input value={roomId} onChange={handleInput} />
-      </div>
-      <div>
-        <button onClick={handleJoin} disabled={enterDisabled}>
-          加入房间
-        </button>
-        <button onClick={handleLeft} disabled={leaveDisabled}>
-          离开房间
-        </button>
+        <Button
+          variant="contained"
+          onClick={handleJoin}
+          disabled={enterDisabled}
+        >
+          Enter Room
+        </Button>
+
+        <Button
+          variant="outlined"
+          color="error"
+          onClick={handleLeft}
+          disabled={leaveDisabled}
+        >
+          Leave Room
+        </Button>
       </div>
     </div>
   );

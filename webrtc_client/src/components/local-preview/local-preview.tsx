@@ -20,6 +20,9 @@ export const LocalPreview: React.FC<LocalPreviewProps> = ({
         videoRef.current.srcObject = stream;
         setLoading(false);
       }
+      if (!stream) {
+        setLoading(true);
+      }
     };
     streamManager.addListener("localStreamChange", handleStreamChange);
 
@@ -29,9 +32,7 @@ export const LocalPreview: React.FC<LocalPreviewProps> = ({
   }, []);
 
   useEffect(() => {
-    if (videoSelected && audioSelected) {
-      streamManager.start(videoSelected, audioSelected);
-    }
+    streamManager.start(videoSelected, audioSelected);
   }, [videoSelected, audioSelected]);
 
   return (

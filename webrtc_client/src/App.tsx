@@ -1,9 +1,9 @@
 import { FC, useMemo, useState } from "react";
 import { Producer } from "./pages";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { createTheme } from "@mui/material";
+import { Box, createTheme } from "@mui/material";
 import { ThemeProvider } from "@mui/system";
-import { ColorModeContext } from "./components";
+import { ColorModeContext, Header } from "./components";
 
 const App: FC = () => {
   const [mode, setMode] = useState<"light" | "dark">("dark");
@@ -30,9 +30,18 @@ const App: FC = () => {
     <BrowserRouter>
       <ColorModeContext.Provider value={colorMode}>
         <ThemeProvider theme={theme}>
-          <Routes>
-            <Route path="/" element={<Producer />} />
-          </Routes>
+          <Box
+            sx={{
+              bgcolor: "background.default",
+              height: "100vh",
+              overflow: "auto",
+            }}
+          >
+            <Header />
+            <Routes>
+              <Route path="/one-on-one" element={<Producer />} />
+            </Routes>
+          </Box>
         </ThemeProvider>
       </ColorModeContext.Provider>
     </BrowserRouter>

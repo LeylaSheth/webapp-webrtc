@@ -1,4 +1,5 @@
 import { io, Socket } from "socket.io-client";
+import { logger } from "./logger-manager";
 import { RTCManager } from "./rtc-manager";
 
 export enum RoomState {
@@ -38,7 +39,11 @@ class RoomManager {
     }
 
     this.socket.on("joined", (roomId, socketId, userCount) => {
-      console.log("receive joined message", roomId, socketId, userCount);
+      logger.addLogMessage(
+        `receive joined message: ${roomId} ${socketId} ${userCount}\n`,
+        "room"
+      );
+      console.log(`receive joined message: ${roomId} ${socketId} ${userCount}`);
       this.roomId = roomId;
       this.setState(RoomState.joined);
 

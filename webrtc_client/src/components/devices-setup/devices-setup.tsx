@@ -1,4 +1,5 @@
 import {
+  Button,
   Divider,
   FormControl,
   FormControlLabel,
@@ -12,16 +13,22 @@ import { FC, ChangeEvent } from "react";
 export interface DeviceSetupProps {
   videoDevices: MediaDeviceInfo[];
   audioDevices: MediaDeviceInfo[];
+  videoSelected: string;
+  audioSelected: string;
   onVideoSelect: (event: ChangeEvent<HTMLInputElement>) => void;
   onAudioSelect: (event: ChangeEvent<HTMLInputElement>) => void;
+  onReset: () => void;
 }
 
 export const DevicesSetup: FC<DeviceSetupProps> = (props) => {
   const {
     videoDevices,
     audioDevices,
+    videoSelected,
+    audioSelected,
     onVideoSelect: handleVideoSelect,
     onAudioSelect: handleAudioSelect,
+    onReset: handleReset,
   } = props;
 
   return (
@@ -33,7 +40,7 @@ export const DevicesSetup: FC<DeviceSetupProps> = (props) => {
             <FormControlLabel
               key={device.deviceId}
               value={device.deviceId}
-              control={<Radio />}
+              control={<Radio checked={device.deviceId === videoSelected} />}
               label={device.label}
             />
           ))}
@@ -47,12 +54,13 @@ export const DevicesSetup: FC<DeviceSetupProps> = (props) => {
             <FormControlLabel
               key={device.deviceId}
               value={device.deviceId}
-              control={<Radio />}
+              control={<Radio checked={device.deviceId === audioSelected} />}
               label={device.label}
             />
           ))}
         </RadioGroup>
       </FormControl>
+      <Button onClick={handleReset}>Reset</Button>
     </Stack>
   );
 };
