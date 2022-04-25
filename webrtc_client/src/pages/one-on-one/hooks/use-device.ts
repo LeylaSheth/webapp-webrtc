@@ -9,7 +9,7 @@ export const useDevice = () => {
   const [audioSelected, setAudioSelected] = useState("");
 
   const handleDeviceChange = useCallback(() => {
-    window.navigator.mediaDevices.enumerateDevices().then((devices) => {
+    navigator.mediaDevices.enumerateDevices().then((devices) => {
       setVideoDevices(devices.filter((d) => d.kind === "videoinput"));
       setAudioDevices(devices.filter((d) => d.kind === "audioinput"));
     });
@@ -24,12 +24,14 @@ export const useDevice = () => {
         console.error("request permission error !!!", e);
       });
 
-    window.navigator.mediaDevices.addEventListener(
-      "devicechange",
-      handleDeviceChange
-    );
+    setTimeout(() => {
+      navigator.mediaDevices.addEventListener(
+        "devicechange",
+        handleDeviceChange
+      );
+    }, 2000);
     return () => {
-      window.navigator.mediaDevices.removeEventListener(
+      navigator.mediaDevices.removeEventListener(
         "devicechange",
         handleDeviceChange
       );
