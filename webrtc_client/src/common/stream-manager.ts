@@ -15,7 +15,7 @@ class StreamManager {
   private remoteStreamChangeListeners: StreamChangeListener[] = [];
 
   async requestPermission() {
-    await navigator.mediaDevices.getUserMedia({
+    await window.navigator.mediaDevices.getUserMedia({
       video: true,
       audio: true,
     });
@@ -23,7 +23,7 @@ class StreamManager {
 
   start(videoDid: string, audioDid: string) {
     if (videoDid && audioDid) {
-      navigator.mediaDevices
+      window.navigator.mediaDevices
         .getUserMedia({
           video: {
             deviceId: {
