@@ -76,7 +76,12 @@ export const Header: FC = () => {
               {pages.map((page) => (
                 <MenuItem key={page.text} onClick={handleCloseNavMenu}>
                   <Link to={page.link}>
-                    <Typography textAlign="center">{page.text}</Typography>
+                    <Typography
+                      textAlign="center"
+                      sx={{ color: "text.primary" }}
+                    >
+                      {page.text}
+                    </Typography>
                   </Link>
                 </MenuItem>
               ))}

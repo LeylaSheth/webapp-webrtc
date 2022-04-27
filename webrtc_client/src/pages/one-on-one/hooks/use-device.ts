@@ -24,14 +24,14 @@ export const useDevice = () => {
         console.error("request permission error !!!", e);
       });
 
-    setTimeout(() => {
-      navigator.mediaDevices.addEventListener(
-        "devicechange",
-        handleDeviceChange
-      );
-    }, 2000);
+    // when http cannot get mediaDevices
+    navigator.mediaDevices?.addEventListener(
+      "devicechange",
+      handleDeviceChange
+    );
+
     return () => {
-      navigator.mediaDevices.removeEventListener(
+      navigator.mediaDevices?.removeEventListener(
         "devicechange",
         handleDeviceChange
       );

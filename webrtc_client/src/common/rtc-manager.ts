@@ -32,6 +32,12 @@ export class RTCManager {
       console.log("track", e);
       logger.addLogMessage(`track: ${e}`, "rtc");
       streamManager.addTrackToRemoteStream(e.track);
+      // setInterval(async () => {
+      //   const stats = await this.connection.getStats(e.track);
+      //   stats.forEach((e) => {
+      //     console.log("stats", e);
+      //   });
+      // }, 1000);
     });
 
     this.connection.addEventListener("iceconnectionstatechange", (e) => {

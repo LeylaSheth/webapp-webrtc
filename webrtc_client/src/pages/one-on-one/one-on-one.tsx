@@ -6,12 +6,12 @@ import {
   LocalPreview,
   DevicesSetup,
   RoomSetup,
+  Logger,
 } from "../../components";
 import "./style.scss";
 import { useDevice, useLocalStream, useRoom } from "./hooks";
 import { Grid } from "@mui/material";
 import { PaperSection } from "./style";
-import { Logger } from "../../components/logger";
 
 export const Producer: React.FC = () => {
   const { localStreamReady } = useLocalStream();
